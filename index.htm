@@ -1,189 +1,156 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favorite Links</title>
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
+```
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+    }
 
-        body{
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-family:"Segoe UI", sans-serif;
+    body{
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        font-family:"Segoe UI", sans-serif;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #f8fbff,
-                    #ffffff,
-                    #eef4ff
-                );
+        background:
+            linear-gradient(
+                135deg,
+                #f8fbff,
+                #ffffff,
+                #eef4ff
+            );
 
-            padding:20px;
-        }
+        padding:20px;
+    }
 
-        .card{
-            width:100%;
-            max-width:420px;
+    .card{
+        width:100%;
+        max-width:420px;
 
-            background:rgba(255,255,255,0.65);
+        background:rgba(255,255,255,0.65);
 
-            backdrop-filter:blur(14px);
+        backdrop-filter:blur(14px);
 
-            border:1px solid rgba(255,255,255,0.8);
+        border:1px solid rgba(255,255,255,0.8);
 
-            border-radius:28px;
+        border-radius:28px;
 
-            padding:45px 30px;
+        padding:45px 30px;
 
-            text-align:center;
+        text-align:center;
 
-            box-shadow:
-                0 10px 35px rgba(0,0,0,0.08);
-        }
+        box-shadow:
+            0 10px 35px rgba(0,0,0,0.08);
+    }
+
+    h1{
+        color:#4d5b75;
+        font-size:32px;
+        margin-bottom:12px;
+    }
+
+    .sub{
+        color:#7b879d;
+        margin-bottom:35px;
+        font-size:15px;
+    }
+
+    .btn{
+        display:block;
+        text-decoration:none;
+        color:white;
+        font-size:20px;
+        font-weight:bold;
+        padding:18px;
+        border-radius:50px;
+        margin-bottom:18px;
+        transition:0.25s;
+    }
+
+    .btn:hover{
+        transform:translateY(-4px);
+    }
+
+    .invader{
+        background:
+            linear-gradient(
+                135deg,
+                #7b68ee,
+                #9f8cff
+            );
+
+        box-shadow:
+            0 8px 20px rgba(123,104,238,0.35);
+    }
+
+    .fortune{
+        background:
+            linear-gradient(
+                135deg,
+                #ff8fb1,
+                #ffb3c7
+            );
+
+        box-shadow:
+            0 8px 20px rgba(255,143,177,0.35);
+    }
+
+    @media(max-width:480px){
 
         h1{
-            color:#4d5b75;
-            font-size:32px;
-            margin-bottom:12px;
-        }
-
-        .sub{
-            color:#7b879d;
-            margin-bottom:35px;
-            font-size:15px;
+            font-size:28px;
         }
 
         .btn{
-            display:block;
-            text-decoration:none;
-            color:white;
-            font-size:20px;
-            font-weight:bold;
-            padding:18px;
-            border-radius:50px;
-            margin-bottom:18px;
-            transition:0.25s;
+            font-size:18px;
+            padding:16px;
         }
 
-        .btn:hover{
-            transform:translateY(-4px);
-        }
+    }
+</style>
+```
 
-        .amazon{
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffb347,
-                    #ffc76a
-                );
-
-            box-shadow:
-                0 8px 20px rgba(255,179,71,0.35);
-        }
-
-        .rakuten{
-            background:
-                linear-gradient(
-                    135deg,
-                    #ff6f91,
-                    #ff9db2
-                );
-
-            box-shadow:
-                0 8px 20px rgba(255,111,145,0.35);
-        }
-
-        .time{
-            background:
-                linear-gradient(
-                    135deg,
-                    #7aa8ff,
-                    #9dc3ff
-                );
-
-            box-shadow:
-                0 8px 20px rgba(122,168,255,0.35);
-        }
-
-        .fortune{
-            background:
-                linear-gradient(
-                    135deg,
-                    #9b7bff,
-                    #c0a8ff
-                );
-
-            box-shadow:
-                0 8px 20px rgba(155,123,255,0.35);
-        }
-
-        @media(max-width:480px){
-
-            h1{
-                font-size:28px;
-            }
-
-            .btn{
-                font-size:18px;
-                padding:16px;
-            }
-
-        }
-    </style>
 </head>
 
 <body>
 
-    <div class="card">
+```
+<div class="card">
 
-        <h1>Favorite Links</h1>
+    <h1>Favorite Links</h1>
 
-        <div class="sub">
-            よく使うサイトへのショートカット
-        </div>
-
-        <a
-            class="btn amazon"
-            href="https://www.amazon.co.jp/"
-            target="_blank"
-        >
-            Amazon
-        </a>
-
-        <a
-            class="btn rakuten"
-            href="https://www.rakuten.co.jp/"
-            target="_blank"
-        >
-            楽天市場
-        </a>
-
-        <a
-            class="btn time"
-            href="https://www.nict.go.jp/JST/JST5.html"
-            target="_blank"
-        >
-            正確な時刻
-        </a>
-
-        <a
-            class="btn fortune"
-            href="https://nm367.github.io/fortune/"
-            target="_blank"
-        >
-            ちゃぷりの四柱推命
-        </a>
-
+    <div class="sub">
+        ゲームと占いへのショートカット
     </div>
+
+    <a
+        class="btn invader"
+        href="https://nm367.github.io/invader/"
+        target="_blank"
+    >
+        インベーダゲーム
+    </a>
+
+    <a
+        class="btn fortune"
+        href="https://nm367.github.io/fortune/"
+        target="_blank"
+    >
+        ちゃぷりの四柱推命
+    </a>
+
+</div>
+```
 
 </body>
 </html>
+
