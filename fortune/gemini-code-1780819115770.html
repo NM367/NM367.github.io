@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ちゃぷりの四柱推命 鑑定</title>
+<style>
+  /* 和風デザインのCSS */
+  body {
+    font-family: "Yu Mincho", "MS Mincho", "Hiragino Mincho ProN", serif;
+    background-color: #f4eedb;
+    background-image: radial-gradient(#e6dcc3 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #3e3a39;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid #a6947e;
+    border-radius: 4px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  h1 {
+    text-align: center;
+    color: #8c2e2e;
+    font-size: 2em;
+    border-bottom: 3px double #8c2e2e;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    letter-spacing: 0.1em;
+  }
+  h2 {
+    color: #165e83;
+    border-left: 5px solid #165e83;
+    padding-left: 10px;
+    margin-top: 40px;
+  }
+  .form-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #fdfaf4;
+    border: 1px solid #dcd3c6;
+  }
+  .form-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+  }
+  input[type="date"], input[type="time"], select {
+    font-family: inherit;
+    font-size: 1em;
+    padding: 8px;
+    border: 1px solid #a6947e;
+    border-radius: 3px;
+    background: #fff;
+    color: #3e3a39;
+  }
+  button {
+    background-color: #8c2e2e;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 12px 30px;
+    font-size: 1.2em;
+    font-family: inherit;
+    border-radius: 4px;
+    transition: 0.3s;
+    letter-spacing: 0.1em;
+  }
+  button:hover {
+    background-color: #6b2222;
+  }
+  
+  .meishiki-wrapper {
+    overflow-x: auto;
+  }
+  .meishiki {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1.2em;
+    min-width: 600px;
+  }
+  .meishiki th, .meishiki td {
+    border: 1px solid #a6947e;
+    text-align: center;
+    padding: 15px;
+    width: 25%;
+    vertical-align: top;
+  }
+  .meishiki th {
+    background-color: #e8d3c7;
+    color: #8c2e2e;
+    font-weight: normal;
+    font-size: 1.1em;
+  }
+  .meishiki td {
+    background-color: #fff;
+  }
+  .row-label {
+    font-size: 0.7em;
+    color: #777;
+    display: block;
+    margin-top: 5px;
+  }
+  .kanji-main {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #111;
+  }
+  .tuhen-box {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed #ccc;
+    font-size: 0.9em;
+  }
+  .center-star {
+    color: #8c2e2e;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  .diagnosis-text {
+    line-height: 1.9;
+    font-size: 1.15em;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #dcd3c6;
+    border-radius: 4px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.03);
+  }
+  .diagnosis-text p {
+    margin: 0 0 15px 0;
+  }
+  .highlight {
+    color: #8c2e2e;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0 5px;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.4/lunar.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>ちゃぷりの四柱推命 鑑定</h1>
+  
+  <div class="form-panel">
+    <div class="form-group">
+      <label for="birthDate">生年月日：</label>
+      <input type="date" id="birthDate" value="1990-01-01">
+    </div>
+    <div class="form-group">
+      <label for="birthTime">生まれた時間：</label>
+      <input type="time" id="birthTime" value="12:00">
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="timeUnknown"> 時間不明
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="gender">性別：</label>
+      <select id="gender">
+        <option value="m">男性</option>
+        <option value="f">女性</option>
+      </select>
+    </div>
+    <div class="form-group" style="width: 100%; justify-content: center; margin-top: 15px;">
+      <button id="btnCalc">鑑定する</button>
+    </div>
+  </div>
+  
+  <div id="result-panel" style="display:none;">
+    <h2>命式表</h2>
+    <p style="text-align: right; font-size: 0.9em; color: #666;">※右から年柱・月柱・日柱・時柱の順に並びます。</p>
+    <div class="meishiki-wrapper">
+      <table class="meishiki">
+        <thead>
+          <tr>
+            <th>時柱 (晩年・子供)</th>
+            <th>日柱 (自分・配偶者)</th>
+            <th>月柱 (社会・仕事)</th>
+            <th>年柱 (先祖・初年)</th>
+          </tr>
+        </thead>
+        <tbody id="meishiki-body">
+        </tbody>
+      </table>
+    </div>
+    
+    <h2>鑑定結果</h2>
+    <div id="diagnosis" class="diagnosis-text">
+    </div>
+  </div>
+</div>
+
+<script>
+function escapeHTML(str) {
+    if(typeof str !== 'string') return str;
+    return str.replace(/[&'`"<>]/g, function(match) {
+        return {
+            '&': '&amp;',
+            "'": '&#x27;',
+            '`': '&#x60;',
+            '"': '&quot;',
+            '<': '&lt;',
+            '>': '&gt;',
+        }[match]
+    });
+}
+
+const GOGYO = {
+  '甲': { v: 0, y: 0 }, '乙': { v: 0, y: 1 },
+  '丙': { v: 1, y: 0 }, '丁': { v: 1, y: 1 },
+  '戊': { v: 2, y: 0 }, '己': { v: 2, y: 1 },
+  '庚': { v: 3, y: 0 }, '辛': { v: 3, y: 1 },
+  '壬': { v: 4, y: 0 }, '癸': { v: 4, y: 1 }
+};
+
+const TUHENSEI = [
+  ['比肩', '劫財'], ['食神', '傷官'], ['偏財', '正財'], ['偏官', '正官'], ['偏印', '印綬']
+];
+
+function getTuhensei(dayGan, targetGan) {
+  if (!dayGan || !targetGan || targetGan === '？') return '？';
+  if (dayGan === targetGan) return '比肩'; 
+  const d = GOGYO[dayGan];
+  const t = GOGYO[targetGan];
+  if (!d || !t) return '';
+  const diff = (t.v - d.v + 5) % 5;
+  const isDiffYinYang = (d.y !== t.y) ? 1 : 0;
+  return TUHENSEI[diff][isDiffYinYang];
+}
+
+const ZOKAN_TABLE = {
+  '子': '癸', '丑': '己', '寅': '甲', '卯': '乙', '辰': '戊', '巳': '丙',
+  '午': '丁', '未': '己', '申': '庚', '酉': '辛', '戌': '戊', '亥': '壬'
+};
+
+const JUNIUN_TABLE = {
+  '甲': {'亥':'長生','子':'沐浴','丑':'冠帯','寅':'建禄','卯':'帝旺','辰':'衰','巳':'病','午':'死','未':'墓','申':'絶','酉':'胎','戌':'養'},
+  '乙': {'午':'長生','巳':'沐浴','辰':'冠帯','卯':'建禄','寅':'帝旺','丑':'衰','子':'病','亥':'死','戌':'墓','酉':'絶','申':'胎','未':'養'},
+  '丙': {'寅':'長生','卯':'沐浴','辰':'冠帯','巳':'建禄','午':'帝旺','未':'衰','申':'病','酉':'死','戌':'墓','亥':'絶','子':'胎','丑':'養'},
+  '戊': {'寅':'長生','卯':'沐浴','辰':'冠帯','巳':'建禄','午':'帝旺','未':'衰','申':'病','酉':'死','戌':'墓','亥':'絶','子':'胎','丑':'養'},
+  '丁': {'酉':'長生','申':'沐浴','未':'冠帯','午':'建禄','巳':'帝旺','辰':'衰','卯':'病','寅':'死','丑':'墓','子':'絶','亥':'胎','戌':'養'},
+  '己': {'酉':'長生','申':'沐浴','未':'冠帯','午':'建禄','巳':'帝旺','辰':'衰','卯':'病','寅':'死','丑':'墓','子':'絶','亥':'胎','戌':'養'},
+  '庚': {'巳':'長生','午':'沐浴','未':'冠帯','申':'建禄','酉':'帝旺','戌':'衰','亥':'病','子':'死','丑':'墓','寅':'絶','卯':'胎','辰':'養'},
+  '辛': {'子':'長生','亥':'沐浴','戌':'冠帯','酉':'建禄','申':'帝旺','未':'衰','午':'病','巳':'死','辰':'墓','卯':'絶','寅':'胎','丑':'養'},
+  '壬': {'申':'長生','酉':'沐浴','戌':'冠帯','亥':'建禄','子':'帝旺','丑':'衰','寅':'病','卯':'死','辰':'墓','巳':'絶','午':'胎','未':'養'},
+  '癸': {'卯':'長生','寅':'沐浴','丑':'冠帯','子':'建禄','亥':'帝旺','戌':'衰','酉':'病','申':'死','未':'墓','午':'絶','巳':'胎','辰':'養'}
+};
+
+function getJuniun(gan, zhi) {
+  if (gan === '？' || zhi === '？') return '？';
+  if (!JUNIUN_TABLE[gan]) return '';
+  return JUNIUN_TABLE[gan][zhi] || '';
+}
+
+document.getElementById('btnCalc').addEventListener('click', () => {
+  const dateStr = document.getElementById('birthDate').value;
+  if (!dateStr) {
+    alert("生年月日を入力してください。");
+    return;
+  }
+  
+  const timeStr = document.getElementById('birthTime').value || "12:00";
+  const isTimeUnknown = document.getElementById('timeUnknown').checked;
+  
+  const [year, month, day] = dateStr.split('-').map(Number);
+  let hour = 12, minute = 0;
+  if (!isTimeUnknown) {
+    const timeParts = timeStr.split(':');
+    hour = Number(timeParts[0]);
+    minute = Number(timeParts[1]);
+  }
+  
+  // 暦計算
+  if (typeof Solar === 'undefined') {
+    alert("計算ライブラリの読み込みに失敗しています。ネット接続を確認するか、ブラウザで開き直してください。");
+    return;
+  }
+  const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+  const lunar = solar.getLunar();
+  const baZi = lunar.getEightChar();
+  
+  const yg = baZi.getYearGan();
+  const yz = baZi.getYearZhi();
+  const mg = baZi.getMonthGan();
+  const mz = baZi.getMonthZhi();
+  const dg = baZi.getDayGan();
+  const dz = baZi.getDayZhi();
+  
+  let tg = '？', tz = '？';
+  if (!isTimeUnknown) {
+    tg = baZi.getTimeGan();
+    tz = baZi.getTimeZhi();
+  }
+  
+  const yZoukan = ZOKAN_TABLE[yz];
+  const mZoukan = ZOKAN_TABLE[mz];
+  const dZoukan = ZOKAN_TABLE[dz];
+  const tZoukan = tz !== '？' ? ZOKAN_TABLE[tz] : '？';
+  
+  const yTuhen = getTuhensei(dg, yg);
+  const mTuhen = getTuhensei(dg, mg);
+  const dTuhen = '日主(自分)';
+  const tTuhen = tg !== '？' ? getTuhensei(dg, tg) : '？';
+  const yZoukanTuhen = getTuhensei(dg, yZoukan);
+  const mZoukanTuhen = getTuhensei(dg, mZoukan);
+  const dZoukanTuhen = getTuhensei(dg, dZoukan);
+  const tZoukanTuhen = tZoukan !== '？' ? getTuhensei(dg, tZoukan) : '？';
+  
+  const yJuni = getJuniun(dg, yz);
+  const mJuni = getJuniun(dg, mz);
+  const dJuni = getJuniun(dg, dz);
+  const tJuni = tz !== '？' ? getJuniun(dg, tz) : '？';
+  
+  const tbody = document.getElementById('meishiki-body');
+  tbody.innerHTML = `
+    <tr>
+      <td><span class="kanji-main">${escapeHTML(tg)}</span><span class="row-label">天干</span>
+          <div class="tuhen-box">${escapeHTML(tTuhen)}</div></td>
+      <td><span class="kanji-main" style="color:#8c2e2e;">${escapeHTML(dg)}</span><span class="row-label">天干</span>
+          <div class="tuhen-box" style="color:#8c2e2e;">${escapeHTML(dTuhen)}</div></td>
+      <td><span class="kanji-main">${escapeHTML(mg)}</span><span class="row-label">天干</span>
+          <div class="tuhen-box">${escapeHTML(mTuhen)}</div></td>
+      <td><span class="kanji-main">${escapeHTML(yg)}</span><span class="row-label">天干</span>
+          <div class="tuhen-box">${escapeHTML(yTuhen)}</div></td>
+    </tr>
+    <tr>
+      <td><span class="kanji-main">${escapeHTML(tz)}</span><span class="row-label">地支</span></td>
+      <td><span class="kanji-main">${escapeHTML(dz)}</span><span class="row-label">地支</span></td>
+      <td><span class="kanji-main">${escapeHTML(mz)}</span><span class="row-label">地支</span></td>
+      <td><span class="kanji-main">${escapeHTML(yz)}</span><span class="row-label">地支</span></td>
+    </tr>
+    <tr>
+      <td><span class="kanji-main">${escapeHTML(tZoukan)}</span><span class="row-label">蔵干</span>
+          <div class="tuhen-box">${escapeHTML(tZoukanTuhen)}</div></td>
+      <td><span class="kanji-main">${escapeHTML(dZoukan)}</span><span class="row-label">蔵干</span>
+          <div class="tuhen-box">${escapeHTML(dZoukanTuhen)}</div></td>
+      <td><span class="kanji-main">${escapeHTML(mZoukan)}</span><span class="row-label">蔵干</span>
+          <div class="tuhen-box"><span class="center-star">${escapeHTML(mZoukanTuhen)}</span> <br>(中心星)</div></td>
+      <td><span class="kanji-main">${escapeHTML(yZoukan)}</span><span class="row-label">蔵干</span>
+          <div class="tuhen-box">${escapeHTML(yZoukanTuhen)}</div></td>
+    </tr>
+    <tr>
+      <td><strong>${escapeHTML(tJuni)}</strong><span class="row-label">十二運</span></td>
+      <td><strong>${escapeHTML(dJuni)}</strong><span class="row-label">十二運</span></td>
+      <td><strong>${escapeHTML(mJuni)}</strong><span class="row-label">十二運</span></td>
+      <td><strong>${escapeHTML(yJuni)}</strong><span class="row-label">十二運</span></td>
+    </tr>
+  `;
+  
+  const diagText = document.getElementById('diagnosis');
+  const dGanDesc = getDayGanDescription(dg);
+  const centerStarDesc = getCenterStarDescription(mZoukanTuhen);
+  
+  diagText.innerHTML = `
+    <p>あなたの本質を表す日干は<span class="highlight">「${escapeHTML(dg)}」</span>です。<br>${escapeHTML(dGanDesc)}</p>
+    <hr style="border:0; border-top:1px dashed #ccc; margin:20px 0;">
+    <p>あなたの社会的な性格や才能を表す中心星は<span class="highlight">「${escapeHTML(mZoukanTuhen)}」</span>です。<br>${escapeHTML(centerStarDesc)}</p>
+  `;
+  
+  document.getElementById('result-panel').style.display = 'block';
+});
+
+function getDayGanDescription(gan) {
+  const map = {
+    '甲': '大樹のように真っ直ぐで、常に上を目指して成長しようとする向上心を持っています。曲がったことが嫌いで正義感が強い性質です。',
+    '乙': '草花のように柔軟で、環境に適応する力に優れています。一見控えめですが、踏まれても立ち上がる忍耐強さを秘めています。',
+    '丙': '太陽のように明るく情熱的で、周囲をポカポカと照らす存在です。裏表がなく、誰に対してもオープンで温かい性質です。',
+    '丁': 'ロウソクや焚き火の炎のように、静かで温かい光を放ちます。思慮深く、人の心を察するデリケートな優しさを持っています。',
+    '戊': '大きな山のようにどっしりと構え、包容力と安定感があります。人を惹きつける魅力があり、頼りがいのある性質です。',
+    '己': '大地や田園の土のように、万物を育む温和で面倒見の良い性質です。平和主義で、周囲との調和を大切にします。',
+    '庚': '鋼や刀剣のように鋭く、決断力と行動力に溢れています。スピーディで合理的な考え方を好み、意志が強い性質です。',
+    '辛': '磨かれた宝石のように繊細で、美意識やプライドが高い性質です。試練を乗り越えることでより一層の輝きを放ちます。',
+    '壬': '大河や海のようにスケールが大きく、自由で束縛を嫌います。清濁併せ呑む器の大きさと、ダイナミックな行動力が特徴です。',
+    '癸': '雨や露のように、優しく静かに万物を潤す性質です。知恵があり、想像力豊かで、物事の裏側を見抜く力を持っています。'
+  };
+  return map[gan] || '';
+}
+
+function getCenterStarDescription(star) {
+  const map = {
+    '比肩': '独立心が旺盛で、自分のペースや信念を大切にします。負けず嫌いで、自らの力で道を切り開いていく強さがあります。',
+    '劫財': '協調性があり社交的ですが、内に熱い闘争心を秘めています。目標達成のためには手段を選ばないようなスケールの大きさがあります。',
+    '食神': 'おおらかで楽天的な、どこか憎めない愛されキャラです。衣食住に恵まれやすく、人生を楽しむ才能を持っています。',
+    '傷官': '感受性が非常に鋭く、芸術的なセンスや専門的な技術を持つ星です。頭の回転が速く、繊細でロマンチストな一面もあります。',
+    '偏財': '社交的で多趣味、周囲の人を楽しませる商売上手な星です。お金や人脈をダイナミックに回していく気前の良さがあります。',
+    '正財': '真面目で誠実、コツコツと着実に努力を積み重ねる星です。家庭や身近な人を大切にし、安定した生活を築く能力に長けています。',
+    '偏官': '親分肌・姉御肌で行動力があり、逆境に強い星です。思い立ったら即行動するダイナミックさと、人を引っ張るリーダー気質があります。',
+    '正官': 'プライドが高く、責任感と規律を重んじる気品のある星です。社会的なルールや秩序を守り、周囲から厚い信頼を得ます。',
+    '偏印': '個性的で知的好奇心が旺盛、常識にとらわれないアイデアマンです。放浪や変化を好み、ユニークな視点で物事を捉えます。',
+    '印綬': '学問や伝統を愛し、探究心に富んだ理性的な星です。知識欲が旺盛で、教えることや育てることに長けた優しい性格です。'
+  };
+  return map[star] || '';
+}
+
+document.getElementById('timeUnknown').addEventListener('change', function() {
+  document.getElementById('birthTime').disabled = this.checked;
+});
+</script>
+</body>
+</html>
