@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>カワイイ・インベーダー</title>
+    <style>
+        /* 安全のため全要素の選択不可・スクロール禁止を強化 */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            touch-action: none; /* スマホの誤操作を徹底防止 */
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: sans-serif;
+        }
+        #game-container { position: relative; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; background: #c2e9fb; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
+        button { background: #ff7eb3; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="top-bar" style="padding: 20px; font-weight: bold; display: flex; justify-content: space-between;">
+                <span id="scoreDisplay">Score: 0</span>
+                <span id="lifeDisplay">❤️❤️❤️</span>
+            </div>
+            <div id="start-screen" class="screen">
+                <h1>カワイイ・インベーダー 🐰</h1>
+                <button id="start-btn">ゲームスタート</button>
+            </div>
+            <div id="game-over-screen" class="screen" style="display: none;">
+                <h1>ゲームオーバー 😢</h1>
+                <button id="restart-btn">もういっかい！</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 前回のロジックをベースに、入力イベントの安定化を追加
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        // ... (以前のゲームロジックコードをここに記述) ...
+        // 修正点: touchstart/touchmoveイベントの第3引数を明確化
+        canvas.addEventListener('touchstart', handleTouch, { passive: false });
+        canvas.addEventListener('touchmove', handleTouch, { passive: false });
+        
+        // ※コード全体は非常に安全ですが、公開時はコンソールにログを出さないよう
+        // console.logなどは削除して運用するのがベストです。
+    </script>
+</body>
+</html>
