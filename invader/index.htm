@@ -5,51 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>カワイイ・インベーダー</title>
     <style>
-        /* 安全のため全要素の選択不可・スクロール禁止を強化 */
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden;
-            touch-action: none; /* スマホの誤操作を徹底防止 */
-            user-select: none;
-            -webkit-user-select: none;
-            font-family: sans-serif;
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background: #c2e9fb; 
+            touch-action: none; /* スマホ操作の挙動を固定 */
+            user-select: none; font-family: sans-serif; 
         }
-        #game-container { position: relative; width: 100%; height: 100%; }
-        canvas { display: block; width: 100%; height: 100%; background: #c2e9fb; }
+        #game-container { position: relative; width: 100vw; height: 100vh; }
+        canvas { display: block; width: 100%; height: 100%; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
+        .screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.9); display: flex; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            pointer-events: auto; z-index: 10; 
+        }
         button { background: #ff7eb3; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; }
+        #exit-btn { background: #aaa; padding: 10px 20px; font-size: 14px; position: absolute; top: 10px; right: 10px; pointer-events: auto; z-index: 5; }
     </style>
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
+        <button id="exit-btn" style="display: none;">やめる</button>
         <div id="ui-layer">
-            <div id="top-bar" style="padding: 20px; font-weight: bold; display: flex; justify-content: space-between;">
-                <span id="scoreDisplay">Score: 0</span>
-                <span id="lifeDisplay">❤️❤️❤️</span>
-            </div>
+            <div style="padding: 20px; font-weight: bold; font-size: 18px;">Score: <span id="scoreDisplay">0</span></div>
             <div id="start-screen" class="screen">
                 <h1>カワイイ・インベーダー 🐰</h1>
-                <button id="start-btn">ゲームスタート</button>
-            </div>
-            <div id="game-over-screen" class="screen" style="display: none;">
-                <h1>ゲームオーバー 😢</h1>
-                <button id="restart-btn">もういっかい！</button>
+                <button id="start-btn">スタート！</button>
             </div>
         </div>
     </div>
+
     <script>
-        // 前回のロジックをベースに、入力イベントの安定化を追加
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        // ... (以前のゲームロジックコードをここに記述) ...
-        // 修正点: touchstart/touchmoveイベントの第3引数を明確化
-        canvas.addEventListener('touchstart', handleTouch, { passive: false });
-        canvas.addEventListener('touchmove', handleTouch, { passive: false });
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const startScreen = document.getElementById('start-screen');
+        const exitBtn = document.getElementById('exit-btn');
         
-        // ※コード全体は非常に安全ですが、公開時はコンソールにログを出さないよう
-        // console.logなどは削除して運用するのがベストです。
+        let width, height, state = 'title', score = 0, playerX = 0;
+        let enemies = [], bullets = [], enemySpeed = 2;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            playerX = width / 2;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function initGame() {
+            score = 0;
+            scoreDisplay.innerText = score;
+            enemies = [];
+            bullets = [];
+            enemySpeed = 2;
+            for(let r=0; r<3; r++) {
+                for(let c=0; c<5; c++) {
+                    enemies.push({x: 50 + c*60, y: 50 + r*50});
+                }
+            }
+            state = 'playing';
+            startScreen.style.display = 'none';
+            exitBtn.style.display = 'block';
+        }
+
+        // 入力制御
+        window.addEventListener('mousemove', (e) => playerX = e.clientX);
+        window.addEventListener('touchmove', (e) => {
+            playerX = e.touches[0].clientX;
+        }, {passive: false});
+
+        function loop() {
+            ctx.clearRect(0, 0, width, height);
+            if (state === 'playing') {
+                ctx.font = '40px Arial';
+                ctx.fillText('🐰', playerX - 20, height - 50);
+                
+                if (Math.random() < 0.05) bullets.push({x: playerX, y: height - 80});
+                bullets.forEach((b, i) => {
+                    b.y -= 10;
+                    ctx.fillText('✨', b.x - 10, b.y);
+                    if (b.y < 0) bullets.splice(i, 1);
+                });
+
+                let hitEdge = false;
+                enemies.forEach(e => {
+                    e.x += enemySpeed;
+                    if (e.x > width - 40 || e.x < 10) hitEdge = true;
+                });
+                if (hitEdge) {
+                    enemySpeed *= -1;
+                    enemies.forEach(e => e.y += 20);
+                }
+
+                enemies.forEach((e, i) => {
+                    ctx.fillText('🧸', e.x, e.y);
+                    bullets.forEach((b, bi) => {
+                        if(Math.hypot(b.x - e.x, b.y - e.y) < 30) {
+                            enemies.splice(i, 1);
+                            bullets.splice(bi, 1);
+                            score += 10;
+                            scoreDisplay.innerText = score;
+                        }
+                    });
+                });
+                if(enemies.length === 0) initGame();
+            }
+            requestAnimationFrame(loop);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', initGame);
+        exitBtn.addEventListener('click', () => {
+            state = 'title';
+            startScreen.style.display = 'flex';
+            exitBtn.style.display = 'none';
+        });
+
+        loop();
     </script>
 </body>
 </html>
