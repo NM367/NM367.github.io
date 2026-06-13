@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ちゃぷりそーと2</title>
+    <style>
+        :root {
+            --bg-color: #fffbeb;
+            --main-pink: #ff6b9b;
+            --accent-orange: #ff9f43;
+            --accent-yellow: #feca57;
+            --accent-green: #1dd1a1;
+            --tube-bg: rgba(255, 255, 255, 0.85);
+            --text-color: #ff527b;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        h1 {
+            color: var(--text-color);
+            margin: 15px 0 10px;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        #level-control {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #level-select {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 3px solid var(--accent-yellow);
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-orange);
+            background: white;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        #game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px 20px;
+            padding: 10px;
+            max-width: 380px;
+        }
+
+        .tube {
+            width: 65px;
+            height: 180px;
+            background-color: var(--tube-bg);
+            border: 4px solid var(--accent-yellow);
+            border-top: none;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            padding-bottom: 10px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .cap {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75px;
+            height: 20px;
+            background: linear-gradient(to bottom, #eccc68, #c68a41);
+            border-radius: 8px;
+            border: 2px solid #8c5a20;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 20;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.4);
+        }
+
+        .tube.completed {
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.9), 0 0 15px rgba(254, 202, 87, 0.5);
+            cursor: default;
+        }
+
+        .tube.completed .cap {
+            opacity: 1;
+            top: -10px; 
+        }
+
+        .ball {
+            width: 44px;
+            height: 38px;
+            border-radius: 50%;
+            margin: 1px 0;
+            transition: transform 0.2s ease-out;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 
+                        inset 3px 3px 8px rgba(255,255,255,0.6),
+                        0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ball.floating {
+            transform: translateY(-30px);
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 
+                        inset 3px 3px 8px rgba(255,255,255,0.6),
+                        0 15px 10px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        #ui-layer {
+            margin-top: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            max-width: 380px;
+            padding: 0 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            background-color: var(--main-pink);
+            color: white;
+            box-shadow: 0 4px 0 #d94573;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #d94573;
+        }
+
+        #add-tube-btn {
+            background-color: var(--accent-green);
+            box-shadow: 0 4px 0 #12a67e;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        #add-tube-btn:active:not(:disabled) {
+            box-shadow: 0 2px 0 #12a67e;
+        }
+
+        #add-tube-btn:disabled {
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.5;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+
+        #modal-content {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 35px;
+            text-align: center;
+            max-width: 85%;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+            border: 4px solid var(--accent-yellow);
+        }
+
+        #modal-content h2 {
+            color: var(--text-color);
+            font-size: 32px;
+            margin: 0 0 25px 0;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ちゃぷりそーと2</h1>
+    
+    <div id="level-control">
+        <select id="level-select"></select>
+    </div>
+
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <button id="add-tube-btn" onclick="addExtraTube()">試験管を増やす (あと3本)</button>
+        <button onclick="undo()">1手戻る</button>
+        <button onclick="resetGame()">やり直し</button>
+    </div>
+
+    <div id="modal">
+        <div id="modal-content">
+            <h2 id="praise-text">ちゃぷりすごい！</h2>
+            <button onclick="nextLevel()" style="background-color: var(--accent-orange); box-shadow: 0 4px 0 #d3761b;">次へすすむ</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        const COLORS = [
+            '#ff6b9b', '#ff9f43', '#feca57', '#1dd1a1', 
+            '#54a0ff', '#9c88ff', '#ff4757', '#00cec9', 
+            '#2ed573', '#1e90ff', '#cd6133', '#2f3640', 
+            '#833471', '#badc58', '#ffcccc', '#273c75'
+        ];
+        
+        const TUBE_CAPACITY = 4;
+        let tubes = [];
+        let initialTubes = []; 
+        let tubeElements = [];
+        let selectedTubeIndex = null;
+        let history = [];
+        let currentLevel = 1;
+        let extraTubesCount = 0;
+        let audioCtx = null;
+
+        const praises = [
+            "ちゃぷりすごい！", "ちゃぷりさいこう！", "ちゃぷりてんさい！", 
+            "さすがちゃぷり！", "ちゃぷりかんぺき！", "ちゃぷり大勝利！"
+        ];
+
+        function isTubeComplete(tube) {
+            return tube.length === TUBE_CAPACITY && tube.every(c => c === tube[0]);
+        }
+
+        function initLevelSelect() {
+            const select = document.getElementById('level-select');
+            select.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.text = 'Level ' + i;
+                select.appendChild(opt);
+            }
+            select.value = currentLevel;
+        }
+
+        // 修正：関数をグローバルから通常の関数に変更
+        function changeLevel() {
+            const select = document.getElementById('level-select');
+            currentLevel = parseInt(select.value, 10);
+            generatePuzzle();
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playMoveSound() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+            
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        function playWinSound() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; 
+            notes.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + index * 0.1);
+                gain.gain.setValueAtTime(0.2, now + index * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + index * 0.1);
+                osc.stop(now + index * 0.1 + 0.4);
+            });
+        }
+
+        function updateUI() {
+            const addBtn = document.getElementById('add-tube-btn');
+            const remaining = 3 - extraTubesCount;
+            if (remaining > 0) {
+                addBtn.innerText = `試験管を増やす (あと${remaining}本)`;
+                addBtn.disabled = false;
+            } else {
+                addBtn.innerText = `試験管を増やす (上限)`;
+                addBtn.disabled = true;
+            }
+        }
+
+        window.addExtraTube = function() {
+            if (extraTubesCount >= 3) return;
+            history.push(JSON.stringify(tubes));
+            extraTubesCount++;
+            tubes.push([]);
+            selectedTubeIndex = null;
+            createDOM();
+            render();
+            updateUI();
+        };
+
+        function createDOM() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+            tubeElements = [];
+
+            tubes.forEach((tube, tubeIdx) => {
+                const tubeDiv = document.createElement('div');
+                tubeDiv.className = 'tube';
+                tubeDiv.onclick = () => {
+                    initAudio();
+                    handleTubeClick(tubeIdx);
+                };
+
+                const capDiv = document.createElement('div');
+                capDiv.className = 'cap';
+                tubeDiv.appendChild(capDiv);
+
+                const ballElements = [];
+                for (let i = 0; i < TUBE_CAPACITY; i++) {
+                    const ballDiv = document.createElement('div');
+                    ballDiv.className = 'ball';
+                    ballDiv.style.visibility = 'hidden';
+                    tubeDiv.appendChild(ballDiv);
+                    ballElements.push(ballDiv);
+                }
+                
+                container.appendChild(tubeDiv);
+                tubeElements.push({ tubeDiv, ballElements });
+            });
+        }
+
+        function render() {
+            tubes.forEach((tube, tubeIdx) => {
+                const { tubeDiv, ballElements } = tubeElements[tubeIdx];
+                
+                if (isTubeComplete(tube)) {
+                    tubeDiv.classList.add('completed');
+                } else {
+                    tubeDiv.classList.remove('completed');
+                }
+
+                for (let i = 0; i < TUBE_CAPACITY; i++) {
+                    const ballDiv = ballElements[i];
+                    if (i < tube.length) {
+                        ballDiv.style.visibility = 'visible';
+                        ballDiv.style.backgroundColor = tube[i];
+                        if (selectedTubeIndex === tubeIdx && i === tube.length - 1) {
+                            ballDiv.classList.add('floating');
+                        } else {
+                            ballDiv.classList.remove('floating');
+                        }
+                    } else {
+                        ballDiv.style.visibility = 'hidden';
+                        ballDiv.classList.remove('floating');
+                    }
+                }
+            });
+        }
+
+        function generatePuzzle() {
+            tubes = [];
+            selectedTubeIndex = null;
+            history = [];
+            extraTubesCount = 0; 
+            
+            const colorCount = Math.min(COLORS.length, 2 + Math.floor((currentLevel - 1) / 8));
+            let pool = [];
+            for(let i = 0; i < colorCount; i++) {
+                for(let j = 0; j < TUBE_CAPACITY; j++) pool.push(COLORS[i]);
+            }
+
+            let isValid = false;
+            while (!isValid) {
+                pool.sort(() => Math.random() - 0.5);
+                const tubeCount = colorCount + 2;
+                tubes = Array.from({ length: tubeCount }, () => []);
+                
+                let tempPool = [...pool];
+                for (let i = 0; i < colorCount; i++) {
+                    tubes[i] = tempPool.splice(0, TUBE_CAPACITY);
+                }
+                
+                const alreadyClean = tubes.some(tube => isTubeComplete(tube));
+                if (!alreadyClean) isValid = true;
+            }
+
+            initialTubes = JSON.parse(JSON.stringify(tubes));
+
+            createDOM();
+            render();
+            updateUI();
+            document.getElementById('level-select').value = currentLevel;
+        }
+
+        function handleTubeClick(index) {
+            if (isTubeComplete(tubes[index])) {
+                selectedTubeIndex = null; 
+                render();
+                return;
+            }
+
+            if (selectedTubeIndex === null) {
+                if (tubes[index].length > 0) {
+                    selectedTubeIndex = index;
+                }
+            } else {
+                if (selectedTubeIndex === index) {
+                    selectedTubeIndex = null;
+                } else {
+                    tryMove(selectedTubeIndex, index);
+                    selectedTubeIndex = null;
+                }
+            }
+            render();
+        }
+
+        function tryMove(fromIdx, toIdx) {
+            const fromTube = tubes[fromIdx];
+            const toTube = tubes[toIdx];
+
+            if (toTube.length >= TUBE_CAPACITY) return; 
+            
+            const ballToMove = fromTube[fromTube.length - 1];
+            const topBallTo = toTube[toTube.length - 1];
+
+            if (toTube.length === 0 || topBallTo === ballToMove) {
+                history.push(JSON.stringify(tubes));
+                
+                let movedCount = 0;
+                while(fromTube.length > 0 && fromTube[fromTube.length - 1] === ballToMove && toTube.length < TUBE_CAPACITY) {
+                    toTube.push(fromTube.pop());
+                    movedCount++;
+                }
+                
+                if (movedCount > 0) {
+                    playMoveSound();
+                }
+                
+                checkWin();
+            }
+        }
+
+        function checkWin() {
+            const isWin = tubes.every(tube => tube.length === 0 || isTubeComplete(tube));
+
+            if (isWin) {
+                setTimeout(() => {
+                    playWinSound();
+                    document.getElementById('praise-text').innerText = praises[Math.floor(Math.random() * praises.length)];
+                    document.getElementById('modal').style.display = 'flex';
+                }, 400); 
+            }
+        }
+
+        window.resetGame = function() {
+            tubes = JSON.parse(JSON.stringify(initialTubes));
+            selectedTubeIndex = null;
+            history = [];
+            extraTubesCount = 0;
+            createDOM();
+            render();
+            updateUI();
+        };
+
+        window.undo = function() {
+            if (history.length > 0) {
+                const prevTubes = JSON.parse(history.pop());
+                
+                if (prevTubes.length !== tubes.length) {
+                    tubes = prevTubes;
+                    extraTubesCount = tubes.length - initialTubes.length;
+                    createDOM();
+                } else {
+                    tubes = prevTubes;
+                }
+                
+                selectedTubeIndex = null;
+                render();
+                updateUI();
+            }
+        };
+
+        window.nextLevel = function() {
+            if (currentLevel < 100) {
+                currentLevel++;
+            } else {
+                alert("全100レベルをクリアしました！ちゃぷり最高！");
+                currentLevel = 1;
+            }
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('level-select').value = currentLevel;
+            generatePuzzle();
+        };
+
+        // 修正：画面が完全に読み込まれてから安全に初期化を走らせる
+        window.addEventListener('DOMContentLoaded', () => {
+            initLevelSelect();
+            document.getElementById('level-select').addEventListener('change', changeLevel);
+            generatePuzzle();
+        });
+    </script>
+</body>
+</html>
