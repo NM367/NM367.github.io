@@ -23,6 +23,9 @@
     --ink:#5A4A42; --ink-soft:#8A776C;
     --panel:#FFFFFF;
     --shadow: 0 6px 0 rgba(0,0,0,0.08);
+    /* マス目用: 色相をはっきり分けた見分けやすい配色 */
+    --r0:#FF6FA5; --r1:#3D7DF0; --r2:#8FCB2E; --r3:#A97BF0; --r4:#FF9F40;
+    --r5:#FFD83D; --r6:#F2645C; --r7:#1FB8CF; --r8:#B9814C; --r9:#98A2B3;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   html,body{
@@ -66,24 +69,20 @@
   .stack{ position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; }
 
   /* ステージ選択 */
-  .tabs{ display:flex; gap:8px; margin-bottom:16px; }
-  .tab-btn{
-    background:#fff; color:var(--ink-soft); padding:9px 16px; border-radius:999px;
-    font-size:14px; font-weight:700; box-shadow:0 3px 0 rgba(0,0,0,.06);
-  }
-  .tab-btn.active{ background:var(--gold); color:#fff; }
   .stage-grid{
-    display:grid; grid-template-columns:repeat(5,1fr); gap:10px; width:100%; max-width:420px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:460px;
+    max-height:58vh; overflow-y:auto; padding:4px 4px 10px; -webkit-overflow-scrolling:touch;
   }
   .stage-cell{
     aspect-ratio:1; background:#fff; border-radius:16px; box-shadow:0 4px 0 rgba(0,0,0,.08);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    font-weight:800; font-size:18px; color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-weight:800; font-size:13px; color:var(--ink);
   }
-  .stage-cell .star{ font-size:12px; color:var(--gold-d); }
+  .stage-cell .level-name{ font-size:13px; }
+  .stage-cell .star{ font-size:10px; color:var(--gold-d); }
   .stage-cell.cleared{ background:linear-gradient(160deg,#FFF3D6,#FFE3B0); }
-  .stage-preview{ display:flex; gap:2px; margin-top:2px; }
-  .stage-preview img{ width:14px; height:14px; object-fit:contain; opacity:.85; }
+  .stage-preview{ display:flex; gap:2px; margin-top:2px; flex-wrap:wrap; justify-content:center; }
+  .stage-preview img{ width:12px; height:12px; object-fit:contain; opacity:.85; }
 
   /* ゲーム画面 */
   .game-header{
@@ -110,14 +109,37 @@
     content:""; position:absolute; inset:0; border:1px solid rgba(255,255,255,.55); pointer-events:none;
   }
   .cell img.animal-icon{
-    width:72%; height:72%; object-fit:contain; opacity:.28; transition:opacity .15s ease, transform .15s ease;
+    width:90%; height:90%; object-fit:contain; opacity:0; transition:opacity .15s ease;
     pointer-events:none;
   }
-  .cell.filled img.animal-icon{ opacity:1; transform:scale(1); animation: pop .28s ease; }
-  @keyframes pop{ 0%{ transform:scale(.3); } 60%{ transform:scale(1.18);} 100%{ transform:scale(1);} }
-  .cell .mark{
-    position:absolute; font-size:1.4em; font-weight:900; color:rgba(90,74,66,.55); pointer-events:none;
+  .icon-pop{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .cell.filled .icon-pop{ animation: pop .32s cubic-bezier(.34,1.56,.64,1) both; }
+  .cell.filled img.animal-icon{
+    opacity:1;
+    animation: idleBob 2.6s ease-in-out .32s infinite;
   }
+  @keyframes pop{ 0%{ transform:scale(.3); } 60%{ transform:scale(1.2);} 100%{ transform:scale(1);} }
+  @keyframes idleBob{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-6%) rotate(-3deg); }
+  }
+  .cell.just-found::before{
+    content:""; position:absolute; inset:0; border-radius:4px; z-index:2;
+    background:radial-gradient(circle, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 70%);
+    animation: foundGlow .55s ease-out;
+    pointer-events:none;
+  }
+  @keyframes foundGlow{
+    0%{ opacity:0; transform:scale(.4); }
+    40%{ opacity:1; transform:scale(1.15); }
+    100%{ opacity:0; transform:scale(1.4); }
+  }
+  .cell .mark{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .1s ease; pointer-events:none;
+  }
+  .cell .mark.show{ opacity:1; }
+  .cell .mark svg{ width:56%; height:56%; overflow:visible; }
   .cell.mistake{ animation: shake .4s ease; }
   @keyframes shake{
     0%,100%{ transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);}
@@ -127,11 +149,11 @@
   .cell.hint-highlight{ box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 6px var(--pink-d); animation: pulse 1s infinite; }
   @keyframes pulse{ 0%,100%{ filter:brightness(1);} 50%{ filter:brightness(1.15);} }
 
-  .region-0{background:var(--pink);} .region-1{background:var(--blue);}
-  .region-2{background:var(--mint);} .region-3{background:var(--brown);}
-  .region-4{background:var(--orange);} .region-5{background:var(--lavender);}
-  .region-6{background:var(--skin);} .region-7{background:var(--tanuki);}
-  .region-8{background:var(--gold);} .region-9{background:var(--cream);}
+  .region-0{background:var(--r0);} .region-1{background:var(--r1);}
+  .region-2{background:var(--r2);} .region-3{background:var(--r3);}
+  .region-4{background:var(--r4);} .region-5{background:var(--r5);}
+  .region-6{background:var(--r6);} .region-7{background:var(--r7);}
+  .region-8{background:var(--r8);} .region-9{background:var(--r9);}
 
   .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:10px; }
   .ctrl-btn{
@@ -255,11 +277,6 @@
   <!-- ステージ選択画面 -->
   <section id="screen-select" class="screen">
     <h1 class="title" style="font-size:22px;">ステージ せんたく</h1>
-    <div class="tabs">
-      <button class="tab-btn active" data-level="easy">かんたん</button>
-      <button class="tab-btn" data-level="normal">ふつう</button>
-      <button class="tab-btn" data-level="hard">むずかしい</button>
-    </div>
     <div class="stage-grid" id="stageGrid"></div>
     <div style="height:16px;"></div>
     <button class="btn small secondary" id="btnBackToTitle">タイトルへ もどる</button>
@@ -326,7 +343,16 @@
     usagi:'うさぎ', neko:'ねこ', inu:'いぬ', kuma:'くま', kitsune:'きつね',
     zou:'ぞう', saru:'さる', tanuki:'たぬき', lion:'ライオン', lioness:'めすライオン'
   };
-  var LEVEL_LABEL = { easy:'かんたん', normal:'ふつう', hard:'むずかしい' };
+  var LEVEL_LABEL = { easy:'レベル1', normal:'レベル2', hard:'レベル3' };
+
+  // 同じレベル内に複数ステージがある場合は「レベル3-12」のように連番を付けて区別する
+  function stageDisplayLabel(stage){
+    var base = LEVEL_LABEL[stage.level] || 'ステージ';
+    var sameLevel = STAGES.filter(function(s){ return s.level === stage.level; });
+    if(sameLevel.length <= 1) return base;
+    var idx = sameLevel.findIndex(function(s){ return s.id === stage.id; });
+    return base + '-' + (idx+1);
+  }
   var DOUBLE_TAP_MS = 280;
   var SAVE_KEY = 'chapuri_meowdoku_save_v1';
 
@@ -405,8 +431,15 @@
   }
   function sndTap(){ beep(520,0.06,'sine',0.08); }
   function sndMark(){ beep(380,0.07,'triangle',0.10); }
-  function sndPlace(){ beep(660,0.09,'sine',0.14); beep(880,0.10,'sine',0.10,0.06); }
-  function sndMistake(){ beep(180,0.22,'sawtooth',0.14); }
+  function sndFound(){
+    // 動物を見つけた瞬間の「やったね」感のあるキラキラした上昇フレーズ
+    [880,1108,1318,1568].forEach(function(f,i){ beep(f,0.16,'triangle',0.15, i*0.055); });
+  }
+  function sndMistake(){
+    // まちがえたと分かりやすい、2回続けての低いブザー音
+    beep(220,0.14,'square',0.16,0);
+    beep(165,0.20,'square',0.16,0.13);
+  }
   function sndClear(){
     [523,659,784,1046].forEach(function(f,i){ beep(f,0.22,'sine',0.14, i*0.09); });
   }
@@ -454,47 +487,35 @@
 
   document.getElementById('btnStart').addEventListener('click', function(){
     ensureAudio();
-    renderStageGrid('easy');
+    renderStageGrid();
     showScreen('select');
   });
   document.getElementById('btnContinue').addEventListener('click', function(){
     ensureAudio();
     var stage = STAGES.find(function(s){ return s.id === save.lastStageId; });
     if(stage){ loadStage(stage); showScreen('game'); }
-    else { renderStageGrid('easy'); showScreen('select'); }
+    else { renderStageGrid(); showScreen('select'); }
   });
   document.getElementById('btnBackToTitle').addEventListener('click', function(){ showScreen('title'); });
   document.getElementById('btnBackToSelect').addEventListener('click', function(){
-    renderStageGrid(currentTabLevel);
+    renderStageGrid();
     showScreen('select');
   });
   document.getElementById('btnClearToSelect').addEventListener('click', function(){
-    renderStageGrid(currentTabLevel);
+    renderStageGrid();
     showScreen('select');
   });
 
-  /* ---------------- ステージ選択 ---------------- */
-  var currentTabLevel = 'easy';
-  var tabButtons = document.querySelectorAll('.tab-btn');
-  tabButtons.forEach(function(btn){
-    btn.addEventListener('click', function(){
-      tabButtons.forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      currentTabLevel = btn.getAttribute('data-level');
-      renderStageGrid(currentTabLevel);
-    });
-  });
-
-  function renderStageGrid(level){
-    currentTabLevel = level;
+  /* ---------------- ステージ選択（レベル1〜3を1画面で表示） ---------------- */
+  function renderStageGrid(){
     var grid = document.getElementById('stageGrid');
     grid.innerHTML = '';
-    var list = STAGES.filter(function(s){ return s.level === level; });
-    list.forEach(function(stage, idx){
+    STAGES.forEach(function(stage, idx){
       var cell = document.createElement('button');
       cell.className = 'stage-cell' + (save.clearedStageIds.indexOf(stage.id) >= 0 ? ' cleared' : '');
       var num = document.createElement('div');
-      num.textContent = (idx+1);
+      num.className = 'level-name';
+      num.textContent = stageDisplayLabel(stage);
       cell.appendChild(num);
       var star = document.createElement('div');
       star.className = 'star';
@@ -502,7 +523,7 @@
       cell.appendChild(star);
       var preview = document.createElement('div');
       preview.className = 'stage-preview';
-      stage.regionAnimals.slice(0,5).forEach(function(a){
+      stage.regionAnimals.slice(0,4).forEach(function(a){
         var img = document.createElement('img');
         img.src = safeAnimalSrc(a); img.alt='';
         preview.appendChild(img);
@@ -545,8 +566,7 @@
     save.lastStageId = stage.id;
     writeSave(save);
 
-    document.getElementById('stageLabel').textContent =
-      LEVEL_LABEL[stage.level] + ' ・ ステージ ' + (STAGES.filter(function(s){return s.level===stage.level;}).findIndex(function(s){return s.id===stage.id;})+1);
+    document.getElementById('stageLabel').textContent = stageDisplayLabel(stage);
     renderHearts();
     renderBoard();
     startTimer();
@@ -594,16 +614,23 @@
         cell.className = 'cell region-'+region;
         cell.dataset.row = r; cell.dataset.col = c;
 
+        var iconPop = document.createElement('div');
+        iconPop.className = 'icon-pop';
+
         var img = document.createElement('img');
         img.className = 'animal-icon';
         img.src = safeAnimalSrc(animal);
         img.alt = ANIMAL_LABEL[animal];
         img.draggable = false;
-        cell.appendChild(img);
+        iconPop.appendChild(img);
+        cell.appendChild(iconPop);
 
         var mark = document.createElement('div');
         mark.className = 'mark';
-        mark.textContent = '';
+        mark.innerHTML = '<svg viewBox="0 0 100 100">'
+          + '<path d="M22,22 L78,78 M78,22 L22,78" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>'
+          + '<path d="M22,22 L78,78 M78,22 L22,78" stroke="#5A4A42" stroke-width="15" stroke-linecap="round"/>'
+          + '</svg>';
         cell.appendChild(mark);
 
         board.appendChild(cell);
@@ -623,8 +650,9 @@
         if(!el) continue;
         var state = G.cellState[r][c];
         el.classList.toggle('filled', state === 'filled');
+        if(state !== 'filled'){ el.classList.remove('just-found'); }
         var markEl = el.querySelector('.mark');
-        markEl.textContent = (state === 'marked') ? '×' : '';
+        markEl.classList.toggle('show', state === 'marked');
       }
     }
   }
@@ -687,8 +715,13 @@
     if(isValidPlacement(r,c)){
       pushHistory();
       G.cellState[r][c] = 'filled';
-      sndPlace();
+      sndFound();
       refreshCellVisuals();
+      var foundEl = getCellEl(r,c);
+      if(foundEl){
+        foundEl.classList.add('just-found');
+        setTimeout(function(){ foundEl.classList.remove('just-found'); }, 600);
+      }
       checkClear();
     } else {
       // ミス
@@ -1006,7 +1039,7 @@
       loadStage(next);
       showScreen('game');
     } else {
-      renderStageGrid(currentTabLevel);
+      renderStageGrid();
       showScreen('select');
     }
   });

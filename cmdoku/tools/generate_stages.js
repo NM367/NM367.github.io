@@ -104,7 +104,7 @@ function countSolutions(N, regionMap, cap = 2) {
 }
 
 // --- 4. 1ステージ分の生成（唯一解になるまでリトライ） ---
-function generateStage(N, maxRegionRetries = 6000, maxSolutionRetries = 100) {
+function generateStage(N, maxRegionRetries = 5000, maxSolutionRetries = 80) {
   for (let sAttempt = 0; sAttempt < maxSolutionRetries; sAttempt++) {
     const solutionCols = generateSolution(N);
     for (let rAttempt = 0; rAttempt < maxRegionRetries; rAttempt++) {
@@ -124,11 +124,16 @@ function generateStage(N, maxRegionRetries = 6000, maxSolutionRetries = 100) {
   throw new Error('唯一解の盤面生成に失敗しました (N=' + N + ')。リトライ回数を増やしてください。');
 }
 
-// --- 5. ステージ構成（かんたん5 / ふつう5 / むずかしい5） ---
+// --- 5. ステージ構成（かんたん1 / ふつう1 / むずかしい48） ---
+const HARD_SIZES = Array.from({ length: 48 }, function (_, i) {
+  // 9x9を中心にしつつ、8個に1個くらいの割合で10x10も混ぜる(生成時間とバリエーションのバランス)
+  return (i % 8 === 7) ? 10 : 9;
+});
+
 const PLAN = [
-  { level: 'easy', sizes: [5, 5, 5, 6, 6] },
-  { level: 'normal', sizes: [7, 7, 8, 8, 8] },
-  { level: 'hard', sizes: [9, 9, 10, 10, 10] },
+  { level: 'easy', sizes: [5] },
+  { level: 'normal', sizes: [7] },
+  { level: 'hard', sizes: HARD_SIZES },
 ];
 
 const stages = [];
@@ -137,7 +142,19 @@ for (const group of PLAN) {
   for (const size of group.sizes) {
     process.stdout.write(`生成中: level=${group.level} size=${size} id=${stageId} ... `);
     const t0 = Date.now();
-    const stage = generateStage(size);
+    let stage = null;
+    let lastErr = null;
+    for (let attempt = 0; attempt < 4 && !stage; attempt++) {
+      try {
+        stage = generateStage(size);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    if (!stage) {
+      console.log(`失敗 (${Date.now() - t0}ms)`);
+      throw lastErr || new Error('生成に失敗しました');
+    }
     stage.id = stageId;
     stage.level = group.level;
     console.log(`OK (${Date.now() - t0}ms)`);
