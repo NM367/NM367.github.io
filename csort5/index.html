@@ -3,14 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>ちゃぷりそーと4</title>
+<!--
+  クリックジャッキング対策（フレームバスティング）:
+  上記のX-Frame-Options / frame-ancestorsは<meta>タグ経由では
+  ブラウザに無視される仕様（HTTPレスポンスヘッダーとしてのみ有効）。
+  GitHub PagesはカスタムHTTPヘッダーを設定できないため、
+  このページが不正なiframeに埋め込まれて操作を乗っ取られる
+  （クリックジャッキング）のを防ぐ実効的な手段がJSによる対策のみとなる。
+  ここでページ全体を一旦非表示にし、自分がトップ階層でなければ
+  トップへ強制的に飛ばす。トップ階層であれば即座に表示を戻す。
+-->
+<style>html{display:none;}</style>
+<script>
+(function(){
+  try{
+    if(window.self===window.top){
+      document.documentElement.style.display='block';
+    } else {
+      window.top.location.href=window.self.location.href;
+    }
+  }catch(e){
+    // クロスオリジンiframe内などtop.locationへのアクセスが例外になる場合も
+    // 安全側に倒して必ず表示を戻す（ページが永久に真っ白になるのを防ぐ）
+    document.documentElement.style.display='block';
+  }
+})();
+</script>
+<title>ちゃぷりそーと5</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -25,7 +51,7 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .25s,transform .25s;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;animation:orbFloat 8s ease-in-out infinite alternate;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.22;animation:orbFloat 7s ease-in-out infinite alternate;}
 .orb1{width:280px;height:280px;background:#7b61ff;top:-60px;left:-60px;}
 .orb2{width:240px;height:240px;background:#ff6bdf;bottom:-50px;right:-50px;animation-delay:3s;}
 .orb3{width:180px;height:180px;background:#00d4ff;top:45%;left:55%;animation-delay:1.5s;}
@@ -53,9 +79,29 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
     rgba(180,255,200,0.18) 330deg, rgba(180,255,200,0) 345deg, rgba(255,225,130,0.22) 360deg);
   animation:raysSpin 22s linear infinite;
 }
+.title-rays2{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:conic-gradient(from 0deg at 50% 32%,
+    rgba(255,80,180,0.16) 0deg, rgba(255,80,180,0) 20deg,
+    rgba(80,220,255,0.16) 40deg, rgba(80,220,255,0) 60deg,
+    rgba(255,220,80,0.16) 80deg, rgba(255,220,80,0) 100deg,
+    rgba(140,255,150,0.16) 120deg, rgba(140,255,150,0) 140deg,
+    rgba(255,80,180,0.16) 160deg, rgba(255,80,180,0) 180deg,
+    rgba(80,220,255,0.16) 200deg, rgba(80,220,255,0) 220deg,
+    rgba(255,220,80,0.16) 240deg, rgba(255,220,80,0) 260deg,
+    rgba(140,255,150,0.16) 280deg, rgba(140,255,150,0) 300deg,
+    rgba(255,80,180,0.16) 320deg, rgba(255,80,180,0) 340deg, rgba(255,80,180,0.16) 360deg);
+  animation:raysSpinReverse 12s linear infinite;
+  mix-blend-mode:screen;
+}
+@keyframes raysSpinReverse{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
 .title-sparkle{position:absolute;border-radius:50%;pointer-events:none;z-index:-1;filter:blur(1px);animation:sparkleTwinkle 2.6s ease-in-out infinite;}
 @keyframes sparkleTwinkle{0%,100%{opacity:0.2;transform:scale(0.7);}50%{opacity:1;transform:scale(1.2);}}
-.main-title{font-size:clamp(24px,8vw,44px);font-weight:900;background:linear-gradient(135deg,#ff3db8,#7b3dff,#00b8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 2px 10px rgba(255,255,255,.6)) drop-shadow(0 0 22px rgba(255,180,80,.4));line-height:1.1;letter-spacing:-1px;text-align:center;}
+.title-emoji-float{position:absolute;pointer-events:none;z-index:-1;font-size:20px;animation:emojiFloat 5s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.15));}
+@keyframes emojiFloat{0%{transform:translateY(0) rotate(0deg) scale(0.9);opacity:0;}10%{opacity:1;}50%{transform:translateY(-22px) rotate(12deg) scale(1.1);}90%{opacity:1;}100%{transform:translateY(-44px) rotate(-8deg) scale(0.9);opacity:0;}}
+.main-title{font-size:clamp(24px,8vw,44px);font-weight:900;background:linear-gradient(90deg,#ff3db8,#ff9d3d,#ffe066,#3dffb8,#3d9dff,#b83dff,#ff3db8);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 2px 10px rgba(255,255,255,.6)) drop-shadow(0 0 22px rgba(255,180,80,.4));line-height:1.1;letter-spacing:-1px;text-align:center;animation:titleShine 4s linear infinite,titlePulse 2.2s ease-in-out infinite;}
+@keyframes titleShine{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+@keyframes titlePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.055);}}
 .sub-title{font-size:clamp(11px,3vw,15px);margin-top:6px;font-weight:700;letter-spacing:2px;text-align:center;}
 #titleScreen .sub-title{color:#5a3d8a;font-weight:800;text-shadow:0 1px 4px rgba(255,255,255,.7);}
 .title-tubes{display:flex;gap:16px;justify-content:center;align-items:flex-end;perspective:600px;}
@@ -112,7 +158,8 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
   background:radial-gradient(ellipse at center, rgba(255,220,150,.5) 0%, rgba(255,180,210,.25) 50%, transparent 80%);
   filter:blur(2px);margin-top:4px;
 }
-.btn-primary{background:linear-gradient(135deg,#7b61ff,#ff6bdf);border:none;border-radius:50px;color:#fff;font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;padding:13px 42px;cursor:pointer;box-shadow:0 4px 24px rgba(255,150,80,.45),0 4px 22px rgba(123,97,255,.35);transition:transform .1s;touch-action:manipulation;}
+.btn-primary{background:linear-gradient(135deg,#7b61ff,#ff6bdf);border:none;border-radius:50px;color:#fff;font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;padding:13px 42px;cursor:pointer;box-shadow:0 4px 24px rgba(255,150,80,.45),0 4px 22px rgba(123,97,255,.35);transition:transform .1s;touch-action:manipulation;animation:btnGlowPulse 1.8s ease-in-out infinite;}
+@keyframes btnGlowPulse{0%,100%{box-shadow:0 4px 24px rgba(255,150,80,.45),0 4px 22px rgba(123,97,255,.35);}50%{box-shadow:0 4px 30px rgba(255,150,80,.75),0 4px 32px rgba(123,97,255,.65),0 0 40px rgba(255,107,223,.5);}}
 .btn-primary:active{transform:scale(0.95);}
 
 /* STAGE SELECT */
@@ -169,6 +216,15 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
 /* 透明玉が公開される瞬間の演出 */
 @keyframes ghostReveal{0%{transform:scale(1);filter:brightness(2.2) saturate(0);}60%{transform:scale(1.18);filter:brightness(1.4) saturate(0.6);}100%{transform:scale(1);filter:brightness(1) saturate(1);}}
 .ball-revealing{animation:ghostReveal .5s ease;}
+
+/* ===== GIMMICK: RAINBOW（虹色玉）===== */
+.ball-rainbow{
+  background:conic-gradient(from 0deg,#ff6b6b,#ffd93d,#6bcf7f,#4ecdc4,#556fb5,#c44fd1,#ff6b6b)!important;
+  animation:rainbowSpin 3s linear infinite;
+  box-shadow:inset -3px -3px 8px rgba(0,0,0,.2),inset 2px 2px 6px rgba(255,255,255,.5),0 0 8px rgba(255,255,255,.5);
+}
+@keyframes rainbowSpin{0%{filter:hue-rotate(0deg);}100%{filter:hue-rotate(360deg);}}
+.rainbow-mark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:60%;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.5);pointer-events:none;filter:drop-shadow(0 0 3px rgba(255,255,255,.8));}
 
 /* ===== GIMMICK: CURTAIN ===== */
 .tube-curtain{position:absolute;inset:0;z-index:10;background:linear-gradient(160deg,#6c3483 0%,#4a235a 40%,#7d3c98 100%);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;overflow:hidden;}
@@ -352,12 +408,24 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
 <!-- TITLE -->
 <div class="screen" id="titleScreen">
   <div class="title-rays"></div>
+  <div class="title-rays2"></div>
   <div class="title-sparkle" style="width:8px;height:8px;top:18%;left:15%;background:#ffe066;box-shadow:0 0 10px #ffe066;animation-delay:0s;"></div>
   <div class="title-sparkle" style="width:6px;height:6px;top:25%;left:80%;background:#ff8ad1;box-shadow:0 0 10px #ff8ad1;animation-delay:.6s;"></div>
   <div class="title-sparkle" style="width:7px;height:7px;top:60%;left:10%;background:#8ad1ff;box-shadow:0 0 10px #8ad1ff;animation-delay:1.2s;"></div>
   <div class="title-sparkle" style="width:5px;height:5px;top:70%;left:85%;background:#ffe066;box-shadow:0 0 10px #ffe066;animation-delay:1.8s;"></div>
   <div class="title-sparkle" style="width:6px;height:6px;top:12%;left:55%;background:#a8ffb0;box-shadow:0 0 10px #a8ffb0;animation-delay:.9s;"></div>
-  <div><div class="main-title">ちゃぷりそーと4</div><div class="sub-title">🧪 COLOR SORT PUZZLE 🧪</div></div>
+  <div class="title-sparkle" style="width:9px;height:9px;top:8%;left:35%;background:#ff8ad1;box-shadow:0 0 12px #ff8ad1;animation-delay:.3s;"></div>
+  <div class="title-sparkle" style="width:5px;height:5px;top:35%;left:92%;background:#a8ffb0;box-shadow:0 0 10px #a8ffb0;animation-delay:1.5s;"></div>
+  <div class="title-sparkle" style="width:7px;height:7px;top:80%;left:45%;background:#8ad1ff;box-shadow:0 0 10px #8ad1ff;animation-delay:2.1s;"></div>
+  <div class="title-sparkle" style="width:6px;height:6px;top:45%;left:6%;background:#ffe066;box-shadow:0 0 10px #ffe066;animation-delay:.45s;"></div>
+  <div class="title-sparkle" style="width:8px;height:8px;top:5%;left:75%;background:#b87bff;box-shadow:0 0 12px #b87bff;animation-delay:1.05s;"></div>
+  <div class="title-emoji-float" style="top:20%;left:12%;animation-delay:0s;">✨</div>
+  <div class="title-emoji-float" style="top:15%;left:78%;animation-delay:1s;">🎉</div>
+  <div class="title-emoji-float" style="top:65%;left:8%;animation-delay:2s;">⭐</div>
+  <div class="title-emoji-float" style="top:8%;left:50%;animation-delay:1.6s;">🌈</div>
+  <div class="title-emoji-float" style="top:72%;left:88%;animation-delay:.6s;">💖</div>
+  <div class="title-emoji-float" style="top:55%;left:92%;animation-delay:2.6s;">✨</div>
+  <div><div class="main-title">ちゃぷりそーと5</div><div class="sub-title">🧪 COLOR SORT PUZZLE 🧪</div></div>
   <div class="title-tubes" id="titleTubes"></div>
   <button class="btn-primary" id="btnStart">ステージをえらぶ ▶</button>
 </div>
@@ -366,7 +434,7 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
 <div class="screen hidden" id="stageScreen">
   <div class="stage-header">
     <button class="btn-icon" id="btnBackToTitle">←</button>
-    <h2>ちゃぷりそーと4</h2>
+    <h2>ちゃぷりそーと5</h2>
     <div style="width:37px"></div>
   </div>
   <div class="stage-grid-wrap">
@@ -438,30 +506,36 @@ const COLORS=[
   null,
   {h:'#FF6B6B'},{h:'#4ECDC4'},{h:'#FFE66D'},
   {h:'#A29BFE'},{h:'#6BCB77'},{h:'#FF9F43'},
-  {h:'#FD79A8'},{h:'#74B9FF'},{h:'#E17055'}
+  {h:'#FD79A8'},{h:'#74B9FF'},{h:'#E17055'},
+  {h:'#8D6E63'},{h:'#D63AFF'}
 ];
 
 /* ============================================================
    GIMMICK TYPES
    ============================================================ */
-const GIMMICK={NONE:0,CURTAIN:1,LOCK:2,MAGNET:3,FROZEN:4,GHOST:5};
-const TOTAL_STAGES=200;
-const MIN_STAGE=101;
+const GIMMICK={NONE:0,CURTAIN:1,LOCK:2,MAGNET:3,FROZEN:4,GHOST:5,RAINBOW:6};
+const TOTAL_STAGES=300;
+const MIN_STAGE=201;
 
 /* ============================================================
    ボール単位ギミック：セル値エンコード方式
-   1-9    : 通常色
-   101-109: FROZEN（固定玉）底に固定され動かせない。色は常に見える
-   201-209: GHOST（透明玉）色は裏で確定済みだが、未公開の間は「？」表示。
-            一番上（操作可能位置）に来た瞬間に公開され、以後は通常色として振る舞う
+   1-99      : 通常色（最大99色まで対応）
+   1000-1099 : FROZEN（固定玉）底に固定され動かせない。色は常に見える
+   2000-2099 : GHOST（透明玉）色は裏で確定済みだが、未公開の間は「？」表示。
+               一番上（操作可能位置）に来た瞬間に公開され、以後は通常色として振る舞う
+   3000      : RAINBOW（虹色玉）どんな色とも合体できる万能玉。色情報を持たない
+               単一の特殊値（元の色は破棄される＝どの色にでも「なれる」ため不要）
+   ※ FROZEN_BASE/GHOST_BASE/RAINBOW_BASEはセル値のエンコード基準値であり、
+     ステージ番号（201〜300）とは無関係。
    ============================================================ */
-const FROZEN_BASE=100, GHOST_BASE=200;
-function isFrozen(cell){return cell>=FROZEN_BASE&&cell<FROZEN_BASE+10;}
-function isGhost(cell){return cell>=GHOST_BASE&&cell<GHOST_BASE+10;}
+const FROZEN_BASE=1000, GHOST_BASE=2000, RAINBOW_BASE=3000;
+function isFrozen(cell){return cell>=FROZEN_BASE&&cell<FROZEN_BASE+100;}
+function isGhost(cell){return cell>=GHOST_BASE&&cell<GHOST_BASE+100;}
+function isRainbow(cell){return cell===RAINBOW_BASE;}
 function realColor(cell){
   if(isFrozen(cell))return cell-FROZEN_BASE;
   if(isGhost(cell))return cell-GHOST_BASE;
-  return cell;
+  return cell; // RAINBOWはそのまま300（実色を持たないセンチネル値）
 }
 function encodeFrozen(color){return FROZEN_BASE+color;}
 function encodeGhost(color){return GHOST_BASE+color;}
@@ -483,20 +557,21 @@ function mulberry32(seed){
    STAGE CONFIG
    ============================================================ */
 function stageConfig(s){
-  // FROZEN（固定玉） 101-120
-  if(s<=110) return{c:5,t:7,e:2,g:GIMMICK.FROZEN,gc:1,cap:4};
-  if(s<=120) return{c:6,t:8,e:2,g:GIMMICK.FROZEN,gc:2,cap:4};
-  // GHOST（透明玉） 121-140
-  if(s<=130) return{c:5,t:7,e:2,g:GIMMICK.GHOST,gc:2,cap:4};
-  if(s<=140) return{c:6,t:8,e:2,g:GIMMICK.GHOST,gc:3,cap:4};
-  // MIX2（カーテン・ロック・磁石・固定玉・透明玉 全部入り） 141-150
-  if(s<=150) return{c:6,t:9,e:3,g:'MIX2',gc:4,cap:4};
-  // ===== ここから玉5個版（試験管が縦に長くなる） =====
-  // MIX3（5個版・全ギミック総力戦） 151-200
-  // 色数・本数は4個仕様と同程度の難易度感を維持するため大きく変えない
-  if(s<=165) return{c:6,t:9,e:3,g:'MIX3',gc:3,cap:5};
-  if(s<=185) return{c:7,t:10,e:3,g:'MIX3',gc:4,cap:5};
-  return{c:7,t:11,e:4,g:'MIX3',gc:5,cap:5};
+  // RAINBOW（虹色玉：どんな色にも合体できる万能玉） 201-220
+  if(s<=210) return{c:5,t:7,e:2,g:GIMMICK.RAINBOW,gc:1,cap:4};
+  if(s<=220) return{c:6,t:8,e:2,g:GIMMICK.RAINBOW,gc:2,cap:4};
+  // MIX4（全ギミック完全総力戦：カーテン・ロック・磁石・固定玉・透明玉・虹色玉） 221-240
+  if(s<=230) return{c:7,t:10,e:3,g:'MIX4',gc:5,cap:5};
+  if(s<=240) return{c:7,t:11,e:4,g:'MIX4',gc:6,cap:5};
+  // MIX5（更に色数・管数を増やした上級総力戦） 241-260
+  if(s<=250) return{c:8,t:12,e:4,g:'MIX5',gc:6,cap:5,fc:1,gh:3,rc:2};
+  if(s<=260) return{c:9,t:13,e:4,g:'MIX5',gc:7,cap:5,fc:2,gh:3,rc:2};
+  // MIX6（さらに難度上昇） 261-280
+  if(s<=270) return{c:9,t:14,e:5,g:'MIX6',gc:8,cap:5,fc:2,gh:4,rc:3};
+  if(s<=280) return{c:10,t:15,e:5,g:'MIX6',gc:9,cap:5,fc:2,gh:4,rc:3};
+  // MIX7（最終エンドコンテンツ：色数・管数・ギミック密度すべて最大） 281-300
+  if(s<=290) return{c:10,t:16,e:6,g:'MIX7',gc:10,cap:5,fc:3,gh:5,rc:3};
+  return{c:11,t:17,e:6,g:'MIX7',gc:11,cap:5,fc:3,gh:5,rc:4};
 }
 
 /* ============================================================
@@ -506,10 +581,15 @@ function stageConfig(s){
    - MAGNET の反発色はギミック管自身の中に含まれる色から選ぶ
      （その管を完成させること自体は阻害しない = 外から入れられないだけ）
    ============================================================ */
+// MIX系ステージ（全ギミックを組み合わせた総力戦）のタグ一覧。
+// 新しいMIX系ティアを追加する際はここに追記するだけで各所の判定に反映される。
+const MIX_TAGS=['MIX','MIX2','MIX3','MIX4','MIX5','MIX6','MIX7'];
+function isMixTag(g){return MIX_TAGS.includes(g);}
+
 function generateStage(s){
   const cfg=stageConfig(s);
   const rng=mulberry32(s*2654435769+54321);
-  const isMix=cfg.g==='MIX'||cfg.g==='MIX2'||cfg.g==='MIX3';
+  const isMix=isMixTag(cfg.g);
   const colorCount=cfg.c,emptyCount=cfg.e,totalTubes=cfg.t,filledCount=totalTubes-emptyCount;
   const cap=cfg.cap||4; // 試験管1本あたりの玉の数（通常4、151以降は5）
 
@@ -525,18 +605,14 @@ function generateStage(s){
 
   const gimmickCount=cfg.gc||0;
 
-  // ギミックタイプリスト（管レベル：CURTAIN/LOCK/MAGNET、ボールレベル：FROZEN/GHOSTは別処理）
+  // ギミックタイプリスト（管レベル：CURTAIN/LOCK/MAGNET、ボールレベル：FROZEN/GHOST/RAINBOWは別処理）
   let gimmickTypes=[];
-  if(cfg.g==='MIX'){
-    gimmickTypes=[GIMMICK.CURTAIN,GIMMICK.LOCK,GIMMICK.MAGNET];
-  } else if(cfg.g==='MIX2'){
-    gimmickTypes=[GIMMICK.CURTAIN,GIMMICK.LOCK,GIMMICK.MAGNET]; // FROZEN/GHOSTはボールレベルで別途付与
-  } else if(cfg.g==='MIX3'){
-    gimmickTypes=[GIMMICK.CURTAIN,GIMMICK.LOCK,GIMMICK.MAGNET]; // FROZEN/GHOSTはボールレベルで別途付与（5個版）
+  if(isMix){
+    gimmickTypes=[GIMMICK.CURTAIN,GIMMICK.LOCK,GIMMICK.MAGNET]; // FROZEN/GHOST/RAINBOWはボールレベルで別途付与
   } else if(cfg.g===GIMMICK.CURTAIN||cfg.g===GIMMICK.LOCK||cfg.g===GIMMICK.MAGNET){
     for(let gi=0;gi<gimmickCount;gi++) gimmickTypes.push(cfg.g);
   }
-  // FROZEN/GHOST単独ステージでは管レベルギミックなし（gimmickTypesは空のまま）
+  // FROZEN/GHOST/RAINBOW単独ステージでは管レベルギミックなし（gimmickTypesは空のまま）
 
   const clTypes=gimmickTypes.filter(g=>g===GIMMICK.CURTAIN||g===GIMMICK.LOCK);
   const mgTypes=gimmickTypes.filter(g=>g===GIMMICK.MAGNET);
@@ -632,8 +708,8 @@ function generateStage(s){
   // 両方の管を同時に完成させることが不可能になる（デッドロック）。
   // → 固定玉に使う色は管ごとに重複させない。
   // ========================================================
-  if(cfg.g===GIMMICK.FROZEN||cfg.g==='MIX2'||cfg.g==='MIX3'){
-    const frozenCount=(cfg.g==='MIX2'||cfg.g==='MIX3')?1:gimmickCount;
+  if(cfg.g===GIMMICK.FROZEN||isMix){
+    const frozenCount=(cfg.fc!==undefined)?cfg.fc:(isMix?1:gimmickCount);
     const candidates=allFilled.filter(ti=>gimmickData[ti].type===GIMMICK.NONE&&tubes[ti].length===cap);
     const usedFrozenColors=new Set();
     let placed=0;
@@ -672,8 +748,8 @@ function generateStage(s){
   // 残り全部を同じ色に揃える必要があるが、GHOSTがその管に異色（裏の色が違う）の
   // まま残ると、完成も空にもできない状態（詰み）が発生しうる。
   // ========================================================
-  if(cfg.g===GIMMICK.GHOST||cfg.g==='MIX2'||cfg.g==='MIX3'){
-    const ghostBallsTotal=(cfg.g==='MIX2'||cfg.g==='MIX3')?2:(gimmickCount===2?4:6);
+  if(cfg.g===GIMMICK.GHOST||isMix){
+    const ghostBallsTotal=(cfg.gh!==undefined)?cfg.gh:(isMix?2:(gimmickCount===2?4:6));
     // 候補位置：(管index, ボールindex) で、
     // ①その管にFROZEN玉が1つも無く、②ボールindexが最上部(cap-1)でないもの
     const positions=[];
@@ -689,6 +765,34 @@ function generateStage(s){
     const chosen=positions.slice(0,Math.min(ghostBallsTotal,positions.length));
     chosen.forEach(([ti,bi])=>{
       tubes[ti][bi]=encodeGhost(tubes[ti][bi]);
+    });
+  }
+
+  // ========================================================
+  // --- RAINBOW（虹色玉）付与 ---
+  // 安全設計：色を変えるのではなく、既存の玉1個を「色不問」に置き換えるだけ。
+  // 全体の色数バランス（各色cap個ずつ）は変化しないため、
+  // 「元の色のまま置かれていた場合の解法」がそのまま常に有効な解として残る
+  // ＝FROZEN/GHOSTと同じ理屈で安全性が保証される。
+  // FROZEN/GHOSTのセルとは重複させない（二重エンコード防止のため必ず最後に処理）。
+  // 位置に制限はない（GHOSTと違い、常に見える玉なので「即公開されて意味がなくなる」
+  // という問題が起きないため、最上部に置いても問題ない）。
+  // ========================================================
+  if(cfg.g===GIMMICK.RAINBOW||isMix){
+    const rainbowCount=(cfg.rc!==undefined)?cfg.rc:(isMix?2:gimmickCount);
+    const positions=[];
+    allFilled.forEach(ti=>{
+      if(tubes[ti].length!==cap)return;
+      for(let bi=0;bi<cap;bi++){
+        const cell=tubes[ti][bi];
+        if(isFrozen(cell)||isGhost(cell))continue;
+        positions.push([ti,bi]);
+      }
+    });
+    for(let i=positions.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[positions[i],positions[j]]=[positions[j],positions[i]];}
+    const chosen=positions.slice(0,Math.min(rainbowCount,positions.length));
+    chosen.forEach(([ti,bi])=>{
+      tubes[ti][bi]=RAINBOW_BASE;
     });
   }
 
@@ -769,9 +873,11 @@ function gimmickEmoji(s){
   if(g===GIMMICK.MAGNET)return'🧲';
   if(g===GIMMICK.FROZEN)return'📌';
   if(g===GIMMICK.GHOST)return'👻';
-  if(g==='MIX')return'🎭';
-  if(g==='MIX2')return'🌌';
-  if(g==='MIX3')return'⭐';
+  if(g===GIMMICK.RAINBOW)return'🌈';
+  if(g==='MIX4')return'👑';
+  if(g==='MIX5')return'💎';
+  if(g==='MIX6')return'🔥';
+  if(g==='MIX7')return'🏆';
   return'';
 }
 
@@ -902,8 +1008,8 @@ function checkAndUnlockGimmicks(){
   const newlyCompleted=[];
   G.tubes.forEach((tube)=>{
     if(tubeComplete(tube)){
-      const col=realColor(tube[0]); // FROZEN等でエンコードされている場合があるため必ずrealColor経由で実色を取得
-      if(!G.completedColors.has(col)){G.completedColors.add(col);newlyCompleted.push(col);}
+      const col=tubeColor(tube); // FROZEN/RAINBOW等でエンコードされている場合があるため必ずtubeColor経由で実色を取得
+      if(col!==null&&!G.completedColors.has(col)){G.completedColors.add(col);newlyCompleted.push(col);}
     }
   });
   newlyCompleted.forEach(col=>{
@@ -1049,6 +1155,17 @@ function makeBall(cell){
     return b;
   }
 
+  if(isRainbow(cell)){
+    // 虹色玉：どんな色にもなれる万能玉（常に見える・回転する虹色グラデーション）
+    inn.classList.add('ball-rainbow');
+    const star=document.createElement('div');
+    star.className='rainbow-mark';
+    star.textContent='✦';
+    inn.appendChild(star);
+    b.appendChild(inn);
+    return b;
+  }
+
   const ci=realColor(cell);
   inn.style.background=`radial-gradient(circle at 35% 35%,${lighten(COLORS[ci].h,28)},${COLORS[ci].h})`;
 
@@ -1068,7 +1185,16 @@ function makeBall(cell){
 function tubeComplete(tube){
   if(tube.length!==G.cap)return false;
   if(tube.some(c=>isGhost(c)))return false; // 未公開の透明玉が1個でもあれば「色未判明」のため未完成扱い
-  return tube.every(c=>realColor(c)===realColor(tube[0]));
+  const nonRainbow=tube.filter(c=>!isRainbow(c));
+  if(nonRainbow.length===0)return true; // 全部虹色玉（理論上稀）は無条件で完成扱い
+  const col=realColor(nonRainbow[0]);
+  return nonRainbow.every(c=>realColor(c)===col); // 虹色玉はどの色とも一致扱いなので除外して判定
+}
+// 完成した管が表している「実際の色」を返す（虹色玉は除いて判定）
+function tubeColor(tube){
+  const nonRainbow=tube.filter(c=>!isRainbow(c));
+  if(nonRainbow.length===0)return null;
+  return realColor(nonRainbow[0]);
 }
 function lighten(hex,p){
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),bv=parseInt(hex.slice(5,7),16),f=p/100;
@@ -1087,11 +1213,12 @@ function updateLegend(){
   if(g===GIMMICK.NONE){bar.style.display='none';return;}
   bar.style.display='flex';
   const items=[];
-  if(g===GIMMICK.CURTAIN||g==='MIX'||g==='MIX2'||g==='MIX3') items.push('🟣 カーテン：指定色を完成させると開く');
-  if(g===GIMMICK.LOCK||g==='MIX'||g==='MIX2'||g==='MIX3')    items.push('🔒 ロック：ドット色を完成させると解除');
-  if(g===GIMMICK.MAGNET||g==='MIX'||g==='MIX2'||g==='MIX3')  items.push('🧲 磁石：ドット色は入れられない');
-  if(g===GIMMICK.FROZEN||g==='MIX2'||g==='MIX3')             items.push('📌 固定玉：底の玉は動かせない');
-  if(g===GIMMICK.GHOST||g==='MIX2'||g==='MIX3')              items.push('👻 透明玉：一番上に来ると色が判明');
+  if(g===GIMMICK.CURTAIN||isMixTag(g)) items.push('🟣 カーテン：指定色を完成させると開く');
+  if(g===GIMMICK.LOCK||isMixTag(g))    items.push('🔒 ロック：ドット色を完成させると解除');
+  if(g===GIMMICK.MAGNET||isMixTag(g))  items.push('🧲 磁石：ドット色は入れられない');
+  if(g===GIMMICK.FROZEN||isMixTag(g))  items.push('📌 固定玉：底の玉は動かせない');
+  if(g===GIMMICK.GHOST||isMixTag(g))   items.push('👻 透明玉：一番上に来ると色が判明');
+  if(g===GIMMICK.RAINBOW||isMixTag(g)) items.push('🌈 虹色玉：どんな色とも合体できる万能玉');
   items.forEach(txt=>{
     const d=document.createElement('div');d.className='legend-item';d.textContent=txt;bar.appendChild(d);
   });
@@ -1158,11 +1285,14 @@ function canMove(from,to){
   if(isTubeLocked(to))return false;
   const topCell=src[src.length-1];
   if(isFrozen(topCell))return false; // 固定玉は動かせない
+  const topIsRainbow=isRainbow(topCell);
   const top=realColor(topCell);
-  // 磁石チェック：反発色は入れられない
+  // 磁石チェック：反発色は入れられない（虹色玉は特殊値なのでrepelColor(1-9)と一致せず、常に磁石をすり抜ける）
   if(isMagnetRepelling(to,top))return false;
   if(dst.length===0)return true;
   const dstTopCell=dst[dst.length-1];
+  // 虹色玉はどんな色とも合体できる：移動する玉・移動先の最上部のどちらかが虹色玉なら常にOK
+  if(topIsRainbow||isRainbow(dstTopCell))return true;
   // 移動先の最上部が固定玉なら、その「上」に積むことはできる（固定玉は最下層にのみ存在する設計）
   return realColor(dstTopCell)===top;
 }
@@ -1205,8 +1335,10 @@ function doMove(from,to){
 
   const fr=fromWrap.querySelector('.tube-body').getBoundingClientRect();
   const tr=toWrap.querySelector('.tube-body').getBoundingClientRect();
-  const ci=realColor(G.tubes[from][G.tubes[from].length-1]);
-  const color=COLORS[ci].h;
+  const flyTopCell=G.tubes[from][G.tubes[from].length-1];
+  const flyIsRainbow=isRainbow(flyTopCell);
+  const ci=realColor(flyTopCell);
+  const color=flyIsRainbow?null:COLORS[ci].h;
   const size=TW-10;
   const sx=fr.left+fr.width/2-size/2,sy=fr.top+6;
   const ex=tr.left+tr.width/2-size/2,ey=tr.bottom-(G.tubes[to].length+n)*BH-4;
@@ -1214,7 +1346,8 @@ function doMove(from,to){
 
   const fly=document.createElement('div');
   fly.className='flying-ball';
-  fly.style.cssText=`width:${size}px;height:${size}px;left:${sx}px;top:${sy}px;background:radial-gradient(circle at 35% 35%,${lighten(color,28)},${color});`;
+  const flyBg=flyIsRainbow?'conic-gradient(from 0deg,#ff6b6b,#ffd93d,#6bcf7f,#4ecdc4,#556fb5,#c44fd1,#ff6b6b)':`radial-gradient(circle at 35% 35%,${lighten(color,28)},${color})`;
+  fly.style.cssText=`width:${size}px;height:${size}px;left:${sx}px;top:${sy}px;background:${flyBg};`;
   if(n>1){const bd=document.createElement('div');bd.className='fly-badge';bd.textContent=n;fly.appendChild(bd);}
   document.body.appendChild(fly);
 
@@ -1336,7 +1469,7 @@ function updateUI(){
 /* ============================================================
    CLEAR
    ============================================================ */
-function baseMoves(s){if(s<=120)return 55;if(s<=140)return 60;if(s<=150)return 70;if(s<=165)return 80;if(s<=185)return 90;return 100;}
+function baseMoves(s){if(s<=210)return 60;if(s<=220)return 65;if(s<=230)return 110;if(s<=240)return 120;if(s<=250)return 130;if(s<=260)return 140;if(s<=270)return 150;if(s<=280)return 160;if(s<=290)return 170;return 180;}
 function showClear(){
   const s=G.stage,mv=G.moves,h=G.hints;
   let stars=h===0&&mv<=baseMoves(s)*1.3?3:h<=1?2:1;
