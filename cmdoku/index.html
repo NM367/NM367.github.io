@@ -48,8 +48,8 @@
   }
   .subtitle{ font-size:13px; color:var(--ink-soft); margin-bottom:18px; }
 
-  .zoo-row{ display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin:10px 0 20px; max-width:420px; }
-  .zoo-row img{ width:46px; height:46px; object-fit:contain; animation: bounce 1.6s infinite ease-in-out; }
+  .zoo-row{ display:grid; grid-template-columns:repeat(5, 1fr); justify-items:center; gap:6px; margin:10px 0 20px; width:100%; max-width:320px; }
+  .zoo-row img{ width:100%; max-width:46px; height:46px; object-fit:contain; animation: bounce 1.6s infinite ease-in-out; }
   .zoo-row img:nth-child(2n){ animation-delay:.15s; }
   .zoo-row img:nth-child(3n){ animation-delay:.3s; }
   .zoo-row img:nth-child(5n){ animation-delay:.45s; }
