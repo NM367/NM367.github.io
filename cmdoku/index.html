@@ -27,7 +27,7 @@
     --r0:#FF6FA5; --r1:#3D7DF0; --r2:#8FCB2E; --r3:#A97BF0; --r4:#FF9F40;
     --r5:#FFD83D; --r6:#F2645C; --r7:#1FB8CF; --r8:#B9814C; --r9:#98A2B3;
   }
-  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
   html,body{
     margin:0; padding:0; height:100%;
     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Yu Gothic","Helvetica Neue",sans-serif;
@@ -776,8 +776,21 @@
     board.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerCancel);
+    // iPhoneでは、コントロールセンターのスワイプや通知バナー、アプリ切り替えなどで
+    // タッチの途中にpointerup/pointercancelが届かないことがある。
+    // そのまま放置すると「操作中」の状態が残り続け、以後ずっとタップに反応しなくなってしまうため、
+    // ページが非表示・非アクティブになったタイミングで強制的に状態をリセットする。
+    window.addEventListener('blur', resetTouchState);
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden) resetTouchState();
+    });
   }
   attachBoardEvents(); // 盤面要素自体はステージ切替時も再利用されるため、登録は一度だけ行う
+
+  function resetTouchState(){
+    dragState = null;
+    cancelPendingTap();
+  }
 
   function cellFromEvent(ev){
     var el = document.elementFromPoint(ev.clientX, ev.clientY);
@@ -789,11 +802,19 @@
 
   function onPointerDown(ev){
     if(!G || G.finished) return;
-    if(dragState) return; // 既に別の指(ポインタ)で操作中は無視する（マルチタッチ対策）
+    if(dragState){
+      // 前回の操作が0.8秒以上前から残っている場合、pointerup/cancelを取りこぼした
+      // 「操作中のまま固まった」状態とみなして自動的に復旧する
+      if(Date.now() - dragState.createdAt > 800){
+        dragState = null;
+      } else {
+        return; // 別の指(ポインタ)で操作中は無視する（マルチタッチ対策）
+      }
+    }
     if(ev.button !== undefined && ev.button > 0) return; // 右クリック等は無視
     var cell = cellFromEvent(ev);
     if(!cell) return;
-    dragState = { pointerId: ev.pointerId, startX: ev.clientX, startY: ev.clientY, active:false, touched:{}, historyPushed:false };
+    dragState = { pointerId: ev.pointerId, startX: ev.clientX, startY: ev.clientY, active:false, touched:{}, historyPushed:false, createdAt: Date.now() };
     dragState._downCell = cell;
   }
 
