@@ -504,18 +504,18 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:var(
    ============================================================ */
 const COLORS=[
   null,
-  {h:'#FF6B6B'},{h:'#4ECDC4'},{h:'#FFE66D'},
-  {h:'#A29BFE'},{h:'#6BCB77'},{h:'#FF9F43'},
-  {h:'#FD79A8'},{h:'#74B9FF'},{h:'#E17055'},
-  {h:'#8D6E63'},{h:'#D63AFF'}
+  {h:'#E6194B'},{h:'#F58231'},{h:'#FFE119'},
+  {h:'#3CB44B'},{h:'#42D4F4'},{h:'#4363D8'},
+  {h:'#911EB4'},{h:'#FF4FA0'},{h:'#8D6E63'},
+  {h:'#9E9E9E'},{h:'#F5F5F0'}
 ];
 
 /* ============================================================
    GIMMICK TYPES
    ============================================================ */
 const GIMMICK={NONE:0,CURTAIN:1,LOCK:2,MAGNET:3,FROZEN:4,GHOST:5,RAINBOW:6};
-const TOTAL_STAGES=300;
-const MIN_STAGE=201;
+const TOTAL_STAGES=400;
+const MIN_STAGE=301;
 
 /* ============================================================
    ボール単位ギミック：セル値エンコード方式
@@ -526,7 +526,7 @@ const MIN_STAGE=201;
    3000      : RAINBOW（虹色玉）どんな色とも合体できる万能玉。色情報を持たない
                単一の特殊値（元の色は破棄される＝どの色にでも「なれる」ため不要）
    ※ FROZEN_BASE/GHOST_BASE/RAINBOW_BASEはセル値のエンコード基準値であり、
-     ステージ番号（201〜300）とは無関係。
+     ステージ番号（301〜400）とは無関係。
    ============================================================ */
 const FROZEN_BASE=1000, GHOST_BASE=2000, RAINBOW_BASE=3000;
 function isFrozen(cell){return cell>=FROZEN_BASE&&cell<FROZEN_BASE+100;}
@@ -571,6 +571,9 @@ function stageConfig(s){
   if(s<=280) return{c:10,t:15,e:5,g:'MIX6',gc:9,cap:5,fc:2,gh:4,rc:3};
   // MIX7（最終エンドコンテンツ：色数・管数・ギミック密度すべて最大） 281-300
   if(s<=290) return{c:10,t:16,e:6,g:'MIX7',gc:10,cap:5,fc:3,gh:5,rc:3};
+  if(s<=300) return{c:11,t:17,e:6,g:'MIX7',gc:11,cap:5,fc:3,gh:5,rc:4};
+  // 301-400：280〜300と同じ難度帯を21ステージ周期で繰り返す（同レベルの新規ステージ）
+  if(s<=400) return stageConfig(280+((s-301)%21));
   return{c:11,t:17,e:6,g:'MIX7',gc:11,cap:5,fc:3,gh:5,rc:4};
 }
 
