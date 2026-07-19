@@ -808,13 +808,21 @@ function generateStage(s){
 let TW=50,BH=40;
 function calcSize(n){
   const vw=Math.min(window.innerWidth,600);
-  const vh=window.innerHeight;
+  const gs=document.getElementById('gameScreen');
+  const header=gs.querySelector('.game-header');
+  const footer=gs.querySelector('.game-footer');
+  const legend=document.getElementById('legendBar');
+  const gsRect=gs.getBoundingClientRect();
+  const headerH=header?header.getBoundingClientRect().height:54;
+  const footerH=footer?footer.getBoundingClientRect().height:50;
+  const legendH=legend?legend.getBoundingClientRect().height:32;
   const rows=n<=5?1:n<=10?2:3;
   const cols=Math.ceil(n/rows);
-  const areaH=vh-54-50-32-20;
+  // 実測した各バーの高さを引いた残りが管の描画に使える高さ
+  const areaH=gsRect.height-headerH-footerH-legendH-16;
   const cap=G.cap||4;
   TW=Math.max(26,Math.min(50,Math.floor((vw-10-(cols-1)*6)/cols)));
-  BH=Math.max(18,Math.min(40,Math.floor((areaH-rows*22)/rows/cap)));
+  BH=Math.max(14,Math.min(36,Math.floor((areaH-rows*20)/rows/cap)));
 }
 
 /* ============================================================
@@ -968,7 +976,7 @@ function startStage(s){
   });
   document.getElementById('hStage').textContent=s;
   document.getElementById('btnNext').style.display=s<TOTAL_STAGES?'':'none';
-  updateUI();renderTubes();updateLegend();
+  updateUI();updateLegend();renderTubes();
   showScreen('gameScreen');
 }
 
